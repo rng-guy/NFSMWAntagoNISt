@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source\Headers">
+      <UniqueIdentifier>{da91ffa3-a55b-4ef0-99b5-0970e802d784}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{31fc80d6-9661-4a07-b22f-bf93c4369e25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Config">
+      <UniqueIdentifier>{ef76c285-d185-4c3b-94d5-1206e6ebdf54}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Headers\MemoryTools.hpp">
+      <Filter>Source\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Headers\FlatContainers.hpp">
+      <Filter>Source\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Headers\StreamParser.hpp">
+      <Filter>Source\Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\dllmain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\cpp.hint">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="README.md">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="Config\NFSMWAntagoNIStSettings.ini">
+      <Filter>Config</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt">
+      <Filter>Docs</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Thumbnail.jpg">
+      <Filter>Docs</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

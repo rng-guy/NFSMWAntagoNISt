@@ -1,0 +1,492 @@
+#pragma once
+
+#include <tuple>
+#include <vector>
+#include <memory>
+#include <utility>
+#include <concepts>
+#include <iterator>
+#include <type_traits>
+#include <initializer_list>
+
+
+
+namespace FlatContainers
+{
+	// Helpers --------------------------------------------------------------------------------------------------------------------------------------
+
+	namespace Details
+	{
+		// Concept to filter for unique_ptr
+		template <typename T>
+		struct IsUnique : std::false_type {};
+
+		template <typename T, class Deleter>
+		struct IsUnique<std::unique_ptr<T, Deleter>> : std::true_type {};
+
+		template <typename T>
+		concept IsUniquePtr = IsUnique<T>::value;
+
+
+
+		// Vector wrapper for common boilerplate
+		template <typename T>
+		class Wrapper
+		{
+		public: // aliases
+
+			using value_type = T;
+
+			using self_base      = Wrapper<value_type>;
+			using container_type = std::vector<value_type>;
+			using size_type      = container_type::size_type;
+
+			using iterator               = container_type::iterator;
+			using const_iterator         = container_type::const_iterator;
+			using reverse_iterator       = container_type::reverse_iterator;
+			using const_reverse_iterator = container_type::const_reverse_iterator;
+
+
+		protected: // members
+			
+			container_type data;
+
+
+		protected: // methods
+
+			constexpr Wrapper() noexcept = default;
+
+
+			constexpr explicit Wrapper(const size_type capacity)
+			{
+				this->reserve(capacity);
+			}
+
+
+		public: // methods
+
+			// May invalidate all iterators
+			constexpr void reserve(const size_type capacity)
+			{
+				this->data.reserve(capacity);
+			}
+
+
+			// May invalidate all iterators
+			constexpr void shrink_to_fit()
+			{
+				this->data.shrink_to_fit();
+			}
+
+
+			// Invalidates all iterators
+			constexpr void clear() noexcept
+			{
+				this->data.clear();
+			}
+
+
+			[[nodiscard]] constexpr bool empty() const noexcept
+			{
+				return this->data.empty();
+			}
+
+
+			[[nodiscard]] constexpr size_type size() const noexcept
+			{
+				return this->data.size();
+			}
+
+
+			[[nodiscard]] constexpr size_type capacity() const noexcept
+			{
+				return this->data.capacity();
+			}
+
+
+			[[nodiscard]] constexpr iterator begin() noexcept {return this->data.begin();}
+			[[nodiscard]] constexpr iterator end  () noexcept {return this->data.end();}
+
+			[[nodiscard]] constexpr const_iterator begin() const noexcept {return this->data.begin();}
+			[[nodiscard]] constexpr const_iterator end  () const noexcept {return this->data.end();}
+
+			[[nodiscard]] constexpr const_iterator cbegin() const noexcept {return this->data.cbegin();}
+			[[nodiscard]] constexpr const_iterator cend  () const noexcept {return this->data.cend();}
+
+			[[nodiscard]] constexpr reverse_iterator rbegin() noexcept {return this->data.rbegin();}
+			[[nodiscard]] constexpr reverse_iterator rend  () noexcept {return this->data.rend();}
+
+			[[nodiscard]] constexpr const_reverse_iterator rbegin() const noexcept {return this->data.rbegin();}
+			[[nodiscard]] constexpr const_reverse_iterator rend  () const noexcept {return this->data.rend();}
+		};
+	}
+	
+
+
+
+
+	// Reasonably STL-compatible flat-Set class -----------------------------------------------------------------------------------------------------
+
+	template <typename T>
+	class Set : public Details::Wrapper<T>
+	{
+	public: // aliases
+
+		using base = typename Set::self_base;
+
+		using value_type     = base::value_type;
+		using container_type = base::container_type;
+		using size_type      = base::size_type;
+
+		using iterator               = base::iterator;
+		using const_iterator         = base::const_iterator;
+		using reverse_iterator       = base::reverse_iterator;
+		using const_reverse_iterator = base::const_reverse_iterator;
+
+
+	public: // methods
+
+		constexpr Set() noexcept = default;
+
+		constexpr explicit Set(const size_type capacity) : base(capacity) {}
+
+
+		constexpr Set(const std::initializer_list<value_type> list)
+		{
+			this->reserve(list.size());
+
+			for (const value_type& value : list)
+				this->insert(value);
+		}
+
+
+		// Invalidates all iterators
+		constexpr Set& operator=(const std::initializer_list<value_type> list)
+		{
+			this->clear();
+			this->reserve(list.size());
+
+			for (const value_type& value : list)
+				this->insert(value);
+
+			return *this;
+		}
+
+
+		// Invalidates all iterators
+		constexpr void swap(Set& other) noexcept
+		{
+			this->data.swap(other.data);
+		}
+
+
+		template <typename ValArg>
+		requires std::equality_comparable_with<ValArg, value_type>
+		[[nodiscard]] constexpr iterator find(const ValArg& value)
+		{
+			return std::find(this->begin(), this->end(), value);
+		}
+
+
+		template <typename ValArg>
+		requires std::equality_comparable_with<ValArg, value_type>
+		[[nodiscard]] constexpr const_iterator find(const ValArg& value) const
+		{
+			return std::find(this->begin(), this->end(), value);
+		}
+
+
+		template <typename ValArg>
+		requires std::equality_comparable_with<ValArg, value_type>
+		[[nodiscard]] constexpr bool contains(const ValArg& value) const
+		{
+			return (this->find(value) != this->end());
+		}
+
+
+		// May invalidate all iterators
+		template <typename ValArg>
+		constexpr std::pair<iterator, bool> insert(ValArg&& value)
+		{
+			const auto it = this->find(value);
+			if (it != this->end()) return {it, false};
+
+			this->data.emplace_back(std::forward<ValArg>(value));
+
+			return {std::prev(this->end()), true};
+		}
+
+
+		// May invalidate all iterators
+		template <typename ...ValArgs>
+		constexpr std::pair<iterator, bool> emplace(ValArgs&&... args)
+		{
+			value_type value(std::forward<ValArgs>(args)...);
+
+			const auto it = this->find(value);
+			if (it != this->end()) return {it, false};
+
+			this->data.emplace_back(std::move(value));
+
+			return {std::prev(this->end()), true};
+		}
+
+
+		// Invalidates iterators of erased and last element
+		constexpr iterator erase(const const_iterator cit)
+		{
+			if (cit == this->cend()) return this->end();
+
+			const size_type index  = std::distance(this->cbegin(), cit);
+			const auto      lastIt = std::prev    (this->end());
+
+			const auto it = this->begin() + index;
+
+			if (it != lastIt)
+				*it = std::move(*lastIt);
+
+			this->data.pop_back();
+
+			return this->begin() + index;
+		}
+
+
+		// Invalidates iterators of erased and last element
+		template <typename ValArg>
+		requires std::equality_comparable_with<ValArg, value_type>
+		constexpr bool erase(const ValArg& value)
+		{
+			const auto it = this->find(value);
+			if (it == this->end()) return false;
+
+			this->erase(it);
+
+			return true;
+		}
+
+
+		// Invalidates iterators of erased and last element
+		constexpr reverse_iterator erase(const reverse_iterator rit)
+		{
+			if (rit == this->rend()) return rit;
+
+			const auto it     = std::prev(rit.base());
+			const auto nextIt = this->erase(it);
+
+			return reverse_iterator(nextIt);
+		}
+	};
+
+	
+
+
+
+	// Similarly STL-compatible flat-Map class ------------------------------------------------------------------------------------------------------
+
+	template <typename K, typename V>
+	class Map : public Details::Wrapper<std::pair<K, V>>
+	{
+	public: // aliases
+
+		using key_type    = K;
+		using mapped_type = V;
+
+		using base = typename Map::self_base;
+
+		using value_type     = base::value_type;
+		using container_type = base::container_type;
+		using size_type      = base::size_type;
+
+		using iterator               = base::iterator;
+		using const_iterator         = base::const_iterator;
+		using reverse_iterator       = base::reverse_iterator;
+		using const_reverse_iterator = base::const_reverse_iterator;
+
+
+	public: // methods
+
+		constexpr Map() noexcept = default;
+
+		constexpr explicit Map(const size_type capacity) : base(capacity) {}
+
+
+		constexpr Map(const std::initializer_list<value_type> list)
+		{
+			this->reserve(list.size());
+
+			for (const auto& [key, value] : list)
+				this->insert(key, value);
+		}
+
+
+		// Invalidates all iterators
+		constexpr Map& operator=(const std::initializer_list<value_type> list)
+		{
+			this->clear();
+			this->reserve(list.size());
+
+			for (const auto& [key, value] : list)
+				this->insert(key, value);
+			
+			return *this;
+		}
+
+  
+		// Invalidates all iterators
+		constexpr void swap(Map& other) noexcept
+		{
+			this->data.swap(other.data);
+		}
+
+
+		template <typename KeyArg>
+		requires std::equality_comparable_with<KeyArg, key_type>
+		[[nodiscard]] constexpr iterator find(const KeyArg& key)
+		{
+			const auto keyMatches = [&key](const value_type& pair) -> bool {return (pair.first == key);};
+			return std::find_if(this->begin(), this->end(), keyMatches);
+		}
+
+
+		template <typename KeyArg>
+		requires std::equality_comparable_with<KeyArg, key_type>
+		[[nodiscard]] constexpr const_iterator find(const KeyArg& key) const
+		{
+			return const_cast<Map*>(this)->find(key);
+		}
+
+
+		template <typename KeyArg>
+		requires std::equality_comparable_with<KeyArg, key_type>
+		[[nodiscard]] constexpr mapped_type* get(const KeyArg& key)
+		{
+			const auto foundKey = this->find(key);
+			if (foundKey == this->end()) return nullptr;
+
+			return &(foundKey->second);
+		}
+
+
+		template <typename KeyArg>
+		requires std::equality_comparable_with<KeyArg, key_type>
+		[[nodiscard]] constexpr const mapped_type* get(const KeyArg& key) const
+		{
+			return const_cast<Map*>(this)->get(key);
+		}
+
+
+		template <typename KeyArg>
+		requires std::equality_comparable_with<KeyArg, key_type>
+		[[nodiscard]] constexpr bool contains(const KeyArg& key) const
+		{
+			return (this->find(key) != this->end());
+		}
+
+
+		// May invalidate all iterators
+		template <typename KeyArg, typename ValArg>
+		constexpr std::pair<iterator, bool> insert
+		(
+			KeyArg&& key, 
+			ValArg&& value
+		) {
+			const auto pairIt = this->find(key);
+			if (pairIt != this->end()) return {pairIt, false};
+
+			this->data.emplace_back(std::forward<KeyArg>(key), std::forward<ValArg>(value));
+
+			return {std::prev(this->end()), true};
+		}
+
+
+		// May invalidate all iterators
+		template <typename KeyArg, typename ...ValArgs>
+		requires (not Details::IsUniquePtr<mapped_type>)
+		constexpr std::pair<iterator, bool> try_emplace
+		(
+			KeyArg&&     key, 
+			ValArgs&& ...args
+		) {
+			const auto pairIt = this->find(key);
+			if (pairIt != this->end()) return {pairIt, false};
+
+			this->data.emplace_back
+			(
+				std::piecewise_construct, 
+				std::forward_as_tuple(std::forward<KeyArg> (key)), 
+				std::forward_as_tuple(std::forward<ValArgs>(args)...)
+			);
+
+			return {std::prev(this->end()), true};
+		}
+
+
+		// May invalidate all iterators
+		template <typename KeyArg, typename ...ValArgs>
+		requires Details::IsUniquePtr<mapped_type>
+		constexpr std::pair<iterator, bool> try_emplace
+		(
+			KeyArg&&     key, 
+			ValArgs&& ...args
+		) {
+			const auto pairIt = this->find(key);
+			if (pairIt != this->end()) return {pairIt, false};
+
+			auto pointer = std::make_unique<typename mapped_type::element_type>(std::forward<ValArgs>(args)...);
+
+			this->data.emplace_back
+			(
+				std::piecewise_construct,
+				std::forward_as_tuple(std::forward<KeyArg>(key)),
+				std::forward_as_tuple(std::move           (pointer))
+			);
+
+			return {std::prev(this->end()), true};
+		}
+
+
+		// Invalidates iterators of erased and last element
+		constexpr iterator erase(const const_iterator cit)
+		{
+			if (cit == this->cend()) return this->end();
+
+			const size_type index      = std::distance(this->cbegin(), cit);
+			const auto      lastPairIt = std::prev    (this->end());
+
+			const auto pairIt = this->begin() + index;
+
+			if (pairIt != lastPairIt)
+				*pairIt = std::move(*lastPairIt);
+
+			this->data.pop_back();
+
+			return this->begin() + index;
+		}
+
+
+		// Invalidates iterators of erased and last element
+		template <typename KeyArg>
+		requires std::equality_comparable_with<KeyArg, key_type>
+		constexpr bool erase(const KeyArg& key)
+		{
+			const auto pairIt = this->find(key);
+			if (pairIt == this->end()) return false;
+
+			this->erase(pairIt);
+
+			return true;
+		}
+
+
+		// Invalidates iterators of erased and last element
+		constexpr reverse_iterator erase(const reverse_iterator rit)
+		{
+			if (rit == this->rend()) return rit;
+			
+			const auto pairIt = std::prev(rit.base());
+			const auto nextIt = this->erase(pairIt);
+
+			return reverse_iterator(nextIt);
+		}
+	};
+}
