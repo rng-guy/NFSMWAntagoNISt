@@ -3,7 +3,7 @@
 
 VIEW THIS FILE on GitHub: https://github.com/rng-guy/NFSMWAntagoNISt
 
-AntagoNISt lets you CHANGE BACKGROUND VEHICLES in NIS cutscenes that have any.
+AntagoNISt lets you change BACKGROUND VEHICLES in NIS cutscenes that have any.
 
 The SECTIONS BELOW address these questions in detail:
  1) • How do I install AntagoNISt for my game?
