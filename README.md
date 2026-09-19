@@ -1,7 +1,7 @@
 
 ![I'm not seeing ghosts!](Thumbnail.jpg "Finally it can truly be everyone.")
 
-AntagoNISt lets you change background vehicles in *Need for Speed: Most Wanted* (2005) NIS cutscenes.
+AntagoNISt lets you **change background vehicles** in *Need for Speed: Most Wanted* (2005) NIS cutscenes.
 
 &nbsp;
 
