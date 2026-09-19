@@ -303,12 +303,12 @@ static bool ExtractScenes(const Parser& parser)
 
 	for (Scene& scene : scenes)
 	{
-		bool extracted = false;
+		bool isExtracted = false;
 
 		if (const auto* const section = parser.GetSection(scene.name))
-			extracted = ExtractScene(*section, scene);
+			isExtracted = ExtractScene(*section, scene);
 
-		if (not extracted)
+		if (not isExtracted)
 			scene.vehicles = AsReference<Vehicles>(0x8EC0F0 + scene.index * sizeof(Vehicles));
 
 		else anyExtracted = true;
