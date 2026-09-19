@@ -154,6 +154,7 @@ ASSEMBLY_DETOUR(SceneVehicles, 0x6F30CB, 0x6F30D1)
 
 		list:
 		xor ebx, ebx
+		mov dword ptr [vehicles], ebx
 		mov dword ptr [esp + 0x80], eax
 
 		jmp dword ptr [listExit]
