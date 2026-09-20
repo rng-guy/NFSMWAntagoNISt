@@ -21,13 +21,17 @@
 
 // Project includes ---------------------------------------------------------------------------------------------------------------------------------
 
+#include <Windows.h>
+
+#ifdef _DEBUG
+#include <debugapi.h>
+#endif
+
 #include <array>
 #include <cstdint>
 #include <fstream>
 #include <filesystem>
 #include <string_view>
-
-#include <Windows.h>
 
 #include "Headers/StreamParser.hpp"
 #include "Headers/MemoryTools.hpp"
@@ -51,16 +55,15 @@ using vault = uint32_t;
 
 
 
-// Mod setup ----------------------------------------------------------------------------------------------------------------------------------------
+// Types --------------------------------------------------------------------------------------------------------------------------------------------
 
-const std::filesystem::path configFile = "scripts/NFSMWAntagoNIStSettings.ini";
-
-// Types and aliases
 constexpr size_t numVehicles = 8; // same as vanilla
 
 using Vehicles = std::array<vault, numVehicles>;
 
-static_assert(sizeof(Vehicles) == 32);
+static_assert(sizeof(Vehicles) == 32, "Layout mismatch");
+
+
 
 struct Scene
 {
@@ -72,7 +75,12 @@ struct Scene
 	Vehicles vehicles = {};
 };
 
-// Assembly detours
+
+
+
+
+// Mod data -----------------------------------------------------------------------------------------------------------------------------------------
+
 const Vehicles* vehicles = nullptr;
 
 constinit std::array scenes =
@@ -139,25 +147,25 @@ ASSEMBLY_DETOUR(SceneName, /* begin = */ 0x6F5223, /* end = */ 0x6F5228)
 // Retrieves vehicles for upcoming cutscene
 ASSEMBLY_DETOUR(SceneVehicles, 0x6F30CB, 0x6F30D1)
 {
-	static constexpr address listExit = 0x6F3161;
+	static constexpr address replacementExit = 0x6F3161;
 
 	__asm
 	{
 		mov eax, dword ptr [vehicles]
 		test eax, eax
-		jne list // use custom list
+		jne replacement // replace vehicles
 
 		sub ebx, 3
 		cmp ebx, 7
 
 		EXIT_ASSEMBLY_DETOUR(SceneVehicles)
 
-		list:
+		replacement:
 		xor ebx, ebx
 		mov dword ptr [vehicles], ebx
 		mov dword ptr [esp + 0x80], eax
 
-		jmp dword ptr [listExit]
+		jmp dword ptr [replacementExit]
 	}
 }
 
@@ -278,7 +286,7 @@ static bool ExtractVehicles
 		"car5", "car6", "car7", "car8"
 	};
 
-	static_assert(keys.size() == numVehicles);
+	static_assert(keys.size() == numVehicles, "Key-size mismatch");
 
 	for (size_t vehicleID = 0; vehicleID < numVehicles; ++vehicleID)
 	{
@@ -332,7 +340,13 @@ static void __cdecl Initialise
 ) {
 	CALL_HOOK_ORIGINAL(Initialise, numArgs, argArray);
 
+	#ifdef _DEBUG
+	while (not IsDebuggerPresent()); // halt until debugger is attached
+	#endif
+
 	// Parse configuration file
+	const std::filesystem::path configFile = "scripts/NFSMWAntagoNIStSettings.ini";
+
 	std::ifstream fileStream(configFile);
 	if (not fileStream.is_open()) return; // no file
 

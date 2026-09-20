@@ -176,11 +176,11 @@
     <ItemGroup>
       <ExeFile Include="$(TargetPath)" />
       <DocumentationTxtFiles Include="$(ProjectDir)README.txt" />
-      <ConfigurationIniFiles Include="$(ProjectDir)\Config\NFSMWAntagoNIStSettings.ini" />      
+      <ConfigurationIniFiles Include="$(ProjectDir)\Config\NFSMWAntagoNIStSettings.ini" />
     </ItemGroup>
     <MakeDir Directories="&#xD;&#xA;       $(CustomOutputDir)scripts" />
     <Exec Command="move /Y &quot;%(ExeFile.Identity)&quot; &quot;$(CustomOutputDir)scripts&quot; &gt; nul" Condition="Exists('%(ExeFile.Identity)')" />
     <Copy SourceFiles="@(DocumentationTxtFiles)" DestinationFolder="$(CustomOutputDir)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(ConfigurationIniFiles)" DestinationFolder="$(CustomOutputDir)scripts" SkipUnchangedFiles="true" />    
+    <Copy SourceFiles="@(ConfigurationIniFiles)" DestinationFolder="$(CustomOutputDir)scripts" SkipUnchangedFiles="true" />
   </Target>
 </Project>
