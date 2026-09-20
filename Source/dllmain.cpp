@@ -33,8 +33,25 @@
 #include <filesystem>
 #include <string_view>
 
-#include "Headers/StreamParser.hpp"
 #include "Headers/MemoryTools.hpp"
+#include "Headers/StreamParser.hpp"
+#include "Headers/FlatContainers.hpp"
+
+
+
+
+
+// Debugging macros ---------------------------------------------------------------------------------------------------------------------------------
+
+// In debug builds, Visual Studio forces an unconditional dynamic allocation for each suitable type.
+// This makes dynamic containers (e.g. std::vector, std::string) constinit-incompatible, even if empty.
+#ifndef _DEBUG
+#define RELEASE_CONSTINIT constinit
+
+#else 
+#define RELEASE_CONSTINIT
+
+#endif
 
 
 
@@ -55,25 +72,13 @@ using vault = uint32_t;
 
 
 
-// Types --------------------------------------------------------------------------------------------------------------------------------------------
+// Game types ---------------------------------------------------------------------------------------------------------------------------------------
 
-constexpr size_t numVehicles = 8; // same as vanilla
+constexpr size_t numVehicles = 8;
 
-using Vehicles = std::array<vault, numVehicles>;
+using VehicleTypes = std::array<vault, numVehicles>;
 
-static_assert(sizeof(Vehicles) == 32, "Layout mismatch");
-
-
-
-struct Scene
-{
-// Members
-
-	const std::string_view name;
-	const size_t           index;
-
-	Vehicles vehicles = {};
-};
+static_assert(sizeof(VehicleTypes) == 32, "Layout mismatch");
 
 
 
@@ -81,27 +86,17 @@ struct Scene
 
 // Mod data -----------------------------------------------------------------------------------------------------------------------------------------
 
-const Vehicles* vehicles = nullptr;
-
-constinit std::array scenes =
+constexpr std::array sceneNames =
 {
-	Scene("IntroNisBL14", 0),
-	Scene("IntroNisBL12", 0),
-	Scene("IntroNisBL15", 1),
-	Scene("IntroNisBL13", 1),
-	Scene("IntroNisBL09", 1),
-	Scene("IntroNisBL05", 1),
-	Scene("IntroNisBL04", 1),
-	Scene("IntroNisBL07", 2),
-	Scene("IntroNisBL03", 2),
-	Scene("IntroNisBL02", 2),
-	Scene("IntroNisBL06", 3),
-	Scene("IntroNisBL11", 4),
-	Scene("IntroNisBL10", 4),
-	Scene("EndingNis04",  5),
-	Scene("IntroNisDD",   6),
-	Scene("EndingNis03",  7)
+	"IntroNisDD",   "EndingNis03",  "IntroNisBL15", "IntroNisBL14",
+	"IntroNisBL13", "IntroNisBL12", "IntroNisBL11", "IntroNisBL10",
+	"IntroNisBL09", "IntroNisBL07", "IntroNisBL06", "IntroNisBL05",
+	"IntroNisBL04", "IntroNisBL03", "IntroNisBL02", "EndingNis04"
 };
+
+const VehicleTypes* replacementTypes = nullptr;
+
+RELEASE_CONSTINIT FlatContainers::Map<std::string_view, VehicleTypes> sceneNameToVehicleTypes;
 
 
 
@@ -109,16 +104,9 @@ constinit std::array scenes =
 
 // Auxiliary functions  -----------------------------------------------------------------------------------------------------------------------------
 
-[[nodiscard]] static const Vehicles* __fastcall GetVehicles(const char* const sceneName)
+[[nodiscard]] static const VehicleTypes* __fastcall GetReplacementTypes(const char* const sceneName)
 {
-	const std::string_view targetName = sceneName;
-
-	for (const Scene& scene : scenes)
-	{
-		if (scene.name == targetName) return &(scene.vehicles);
-	}
-
-	return nullptr;
+	return sceneNameToVehicleTypes.get(std::string_view(sceneName)); // avoids length re-calculations
 }
 
 
@@ -137,13 +125,13 @@ ASSEMBLY_DETOUR(SceneVehicles, /* begin = */ 0x6F5607, /* end = */ 0x6F5610)
 		push eax
 
 		mov ecx, ebx
-		call GetVehicles // ecx: sceneName
-		mov dword ptr [vehicles], eax
+		call GetReplacementTypes // ecx: sceneName
+		mov dword ptr [replacementTypes], eax
 
 		lea ecx, dword ptr [esi - 0x48]
 		call dword ptr [PrepareVehicles]
 
-		mov dword ptr [vehicles], 0x0
+		mov dword ptr [replacementTypes], 0x0
 
 		EXIT_ASSEMBLY_DETOUR(SceneVehicles)
 	}
@@ -158,7 +146,7 @@ ASSEMBLY_DETOUR(VehicleSource, 0x6F30CB, 0x6F30D1)
 
 	__asm
 	{
-		mov eax, dword ptr [vehicles]
+		mov eax, dword ptr [replacementTypes]
 		test eax, eax
 		jne replacement // replace vehicles
 
@@ -257,12 +245,12 @@ ASSEMBLY_DETOUR(VehicleSource, 0x6F30CB, 0x6F30D1)
 
 // Initialisation helpers ---------------------------------------------------------------------------------------------------------------------------
 
-[[nodiscard]] static bool IsValidVehicleType(const vault type)
+[[nodiscard]] static bool IsValidVehicleType(const vault vehicleType)
 {
 	const auto GetVaultNode          = AsFunction<address __cdecl    (vault,   vault)>        (0x455FD0);
 	const auto GetVaultNodeAttribute = AsFunction<address __thiscall (address, vault, size_t)>(0x454190);
 
-	const address node = GetVaultNode("pvehicle"_vlt, type);
+	const address node = GetVaultNode("pvehicle"_vlt, vehicleType);
 	if (not node) return false; // unknown attribute node
 
 	const address attribute = GetVaultNodeAttribute(node, "CLASS"_vlt, /* index = */ 0);
@@ -280,10 +268,10 @@ ASSEMBLY_DETOUR(VehicleSource, 0x6F30CB, 0x6F30D1)
 
 
 
-static bool ExtractVehicles
+static bool ExtractVehicleTypes
 (
-	const Parser::Section& section, 
-	Vehicles&              vehicles
+	const Parser::Section* const section, 
+	VehicleTypes&                vehicleTypes
 ) {
 	static constexpr std::array keys =
 	{
@@ -301,7 +289,7 @@ static bool ExtractVehicles
 		const vault vehicleType = GetVaultHash(vehicleName);
 		if (not IsValidVehicleType(vehicleType)) return false;
 
-		vehicles[vehicleID] = vehicleType;
+		vehicleTypes[vehicleID] = vehicleType;
 	}
 
 	return true;
@@ -311,22 +299,19 @@ static bool ExtractVehicles
 
 static bool ExtractScenes(const Parser& parser)
 {
-	bool anyExtracted = false;
+	sceneNameToVehicleTypes.reserve(sceneNames.size());
 
-	for (Scene& scene : scenes)
+	for (const std::string_view sceneName : sceneNames)
 	{
-		bool isExtracted = false;
+		VehicleTypes vehicleTypes = {};
 
-		if (const auto* const section = parser.GetSection(scene.name))
-			isExtracted = ExtractVehicles(*section, scene.vehicles);
-
-		if (not isExtracted)
-			scene.vehicles = AsReference<Vehicles>(0x8EC0F0 + scene.index * sizeof(Vehicles));
-
-		else anyExtracted = true;
+		if (ExtractVehicleTypes(parser.GetSection(sceneName), vehicleTypes))
+			sceneNameToVehicleTypes.insert(sceneName, vehicleTypes);
 	}
 
-	return anyExtracted;
+	sceneNameToVehicleTypes.shrink_to_fit();
+
+	return (not sceneNameToVehicleTypes.empty());
 }
 
 
@@ -354,7 +339,7 @@ static void __cdecl Initialise
 	std::ifstream fileStream(configFile);
 	if (not fileStream.is_open()) return; // no file
 
-	const Parser parser(fileStream, scenes.size(), numVehicles);
+	const Parser parser(fileStream, sceneNames.size(), numVehicles);
 	if (not ExtractScenes(parser)) return; // no valid scene(s)
 
 	// Code changes
