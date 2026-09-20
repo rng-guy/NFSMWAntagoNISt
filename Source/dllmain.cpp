@@ -295,9 +295,8 @@ static bool ExtractVehicles
 
 	for (size_t vehicleID = 0; vehicleID < numVehicles; ++vehicleID)
 	{
-		std::string_view vehicleName;
-		
-		if (not Parser::ExtractValues(section, keys[vehicleID], vehicleName)) return false;
+		std::string_view vehicleName; // must be non-empty and match VltEd node with compatible vehicle type
+		if (not Parser::ExtractValues<std::string_view>(section, keys[vehicleID], vehicleName)) return false;
 
 		const vault vehicleType = GetVaultHash(vehicleName);
 		if (not IsValidVehicleType(vehicleType)) return false;
