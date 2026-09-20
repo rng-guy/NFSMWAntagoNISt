@@ -125,29 +125,34 @@ constinit std::array scenes =
 
 // Assembly detours ---------------------------------------------------------------------------------------------------------------------------------
 
-// Checks name of the upcoming cutscene for the game to play
-ASSEMBLY_DETOUR(SceneName, /* begin = */ 0x6F5223, /* end = */ 0x6F5228)
+// Prepares (background) vehicles for currently requested NIS cutscene
+ASSEMBLY_DETOUR(SceneVehicles, /* begin = */ 0x6F5607, /* end = */ 0x6F5610)
 {
+	static constexpr address PrepareVehicles = 0x6F2F60;
+
 	__asm
 	{
-		// Execute original code first
-		mov edi, dword ptr [ebp + 0x8]
-		mov esi, ecx
+		push eax
 
 		mov ecx, ebx
 		call GetVehicles // ecx: sceneName
 		mov dword ptr [vehicles], eax
 
-		EXIT_ASSEMBLY_DETOUR(SceneName)
+		lea ecx, dword ptr [esi - 0x48]
+		call dword ptr [PrepareVehicles]
+
+		mov dword ptr [vehicles], 0x0
+
+		EXIT_ASSEMBLY_DETOUR(SceneVehicles)
 	}
 }
 
 
 
-// Retrieves vehicles for upcoming cutscene
-ASSEMBLY_DETOUR(SceneVehicles, 0x6F30CB, 0x6F30D1)
+// Selects source for background vehicles in NIS cutscene
+ASSEMBLY_DETOUR(VehicleSource, 0x6F30CB, 0x6F30D1)
 {
-	static constexpr address replacementExit = 0x6F3161;
+	static constexpr address replacementExit = 0x6F3159;
 
 	__asm
 	{
@@ -158,11 +163,9 @@ ASSEMBLY_DETOUR(SceneVehicles, 0x6F30CB, 0x6F30D1)
 		sub ebx, 3
 		cmp ebx, 7
 
-		EXIT_ASSEMBLY_DETOUR(SceneVehicles)
+		EXIT_ASSEMBLY_DETOUR(VehicleSource)
 
 		replacement:
-		xor ebx, ebx
-		mov dword ptr [vehicles], ebx
 		mov dword ptr [esp + 0x80], eax
 
 		jmp dword ptr [replacementExit]
@@ -354,8 +357,8 @@ static void __cdecl Initialise
 	if (not ExtractScenes(parser)) return; // no valid scene(s)
 
 	// Code changes
-	PATCH_ASSEMBLY_DETOUR(SceneName);
 	PATCH_ASSEMBLY_DETOUR(SceneVehicles);
+	PATCH_ASSEMBLY_DETOUR(VehicleSource);
 }
 
 
