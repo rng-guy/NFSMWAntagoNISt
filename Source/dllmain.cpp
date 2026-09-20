@@ -101,7 +101,7 @@ constinit std::array scenes =
 
 // Auxiliary functions  -----------------------------------------------------------------------------------------------------------------------------
 
-static const Vehicles* __fastcall GetVehicles(const char* const sceneName)
+[[nodiscard]] static const Vehicles* __fastcall GetVehicles(const char* const sceneName)
 {
 	for (const Scene& scene : scenes)
 	{
@@ -267,10 +267,10 @@ ASSEMBLY_DETOUR(SceneVehicles, 0x6F30CB, 0x6F30D1)
 
 
 
-static bool ExtractScene
+static bool ExtractVehicles
 (
 	const Parser::Section& section, 
-	Scene&                 scene
+	Vehicles&              vehicles
 ) {
 	static constexpr std::array keys =
 	{
@@ -289,7 +289,7 @@ static bool ExtractScene
 		const vault vehicleType = GetVaultHash(vehicleName);
 		if (not IsValidVehicleType(vehicleType)) return false;
 
-		scene.vehicles[vehicleID] = vehicleType;
+		vehicles[vehicleID] = vehicleType;
 	}
 
 	return true;
@@ -306,7 +306,7 @@ static bool ExtractScenes(const Parser& parser)
 		bool isExtracted = false;
 
 		if (const auto* const section = parser.GetSection(scene.name))
-			isExtracted = ExtractScene(*section, scene);
+			isExtracted = ExtractVehicles(*section, scene.vehicles);
 
 		if (not isExtracted)
 			scene.vehicles = AsReference<Vehicles>(0x8EC0F0 + scene.index * sizeof(Vehicles));
