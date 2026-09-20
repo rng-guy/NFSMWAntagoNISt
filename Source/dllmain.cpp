@@ -111,9 +111,11 @@ constinit std::array scenes =
 
 [[nodiscard]] static const Vehicles* __fastcall GetVehicles(const char* const sceneName)
 {
+	const std::string_view targetName = sceneName;
+
 	for (const Scene& scene : scenes)
 	{
-		if (scene.name == sceneName) return &(scene.vehicles);
+		if (scene.name == targetName) return &(scene.vehicles);
 	}
 
 	return nullptr;
