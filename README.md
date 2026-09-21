@@ -1,7 +1,7 @@
 
 ![I'm not seeing ghosts!](Thumbnail.jpg "Finally it can truly be everyone.")
 
-AntagoNISt lets you change **background vehicles** in *Need for Speed: Most Wanted* (2005) NIS cutscenes.
+AntagoNISt lets you **change background vehicles** in *Need for Speed: Most Wanted* (2005) NIS cutscenes.
 
 &nbsp;
 
@@ -29,7 +29,7 @@ The **sections below** address these questions in detail:
 &nbsp;
 
 **To install** AntagoNISt:
-1. download and extract the [`NfSMW_AntagoNISt_v1.00.0.7z`](https://github.com/rng-guy/NFSMWAntagoNISt/releases/latest) archive;
+1. download and extract the [`NfSMW_AntagoNISt_v1.00.1.7z`](https://github.com/rng-guy/NFSMWAntagoNISt/releases/latest) archive;
 2. copy AntagoNISt's `scripts` folder to your game's folder, replacing existing files; and
 3. if AntagoNISt's `.asi` file gets flagged by your antivirus software, whitelist the file.
 
