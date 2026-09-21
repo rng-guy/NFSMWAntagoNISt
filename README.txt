@@ -1,5 +1,5 @@
 ﻿
-── ■ │ WHAT IS NFSMW ANTAGONIST? (v1.00.01) │ ■ ───────────────────────────────────────────────────
+── ■ │ WHAT IS NFSMW ANTAGONIST? (v1.00.02) │ ■ ───────────────────────────────────────────────────
 
 VIEW THIS FILE on GitHub: https://github.com/rng-guy/NFSMWAntagoNISt
 
@@ -65,3 +65,4 @@ In the interest of code transparency, however, consider linking to AntagoNISt's 
 
 v1.00.00: Initial release
       01: Corrected README formatting
+      02: Marked unused vehicles in .ini file
