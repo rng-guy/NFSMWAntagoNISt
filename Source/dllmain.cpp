@@ -279,7 +279,7 @@ static bool ExtractVehicleTypes
 		"car5", "car6", "car7", "car8"
 	};
 
-	static_assert(keys.size() == numVehicles, "Key-size mismatch");
+	static_assert(keys.size() == numVehicles, "Key-count mismatch");
 
 	for (size_t vehicleID = 0; vehicleID < numVehicles; ++vehicleID)
 	{
