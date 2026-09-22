@@ -29,7 +29,7 @@ The **sections below** address these questions in detail:
 &nbsp;
 
 **To install** AntagoNISt:
-1. download and extract the [`NfSMW_AntagoNISt_v1.00.2.7z`](https://github.com/rng-guy/NFSMWAntagoNISt/releases/latest) archive;
+1. download and extract the [`NfSMW_AntagoNISt_v1.00.3.7z`](https://github.com/rng-guy/NFSMWAntagoNISt/releases/latest) archive;
 2. copy AntagoNISt's `scripts` folder to your game's folder, replacing existing files; and
 3. if AntagoNISt's `.asi` file gets flagged by your antivirus software, whitelist the file.
 
