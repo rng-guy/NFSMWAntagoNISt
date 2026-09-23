@@ -52,7 +52,7 @@ namespace StreamParser
 		concept AreExtractable = ((sizeof...(Vs) > 0) and ... and (IsAnyStringOrView<Vs> or IsPureEnum<Vs> or IsPureArithmetic<Vs>));
 
 		template <typename S, typename ...Vs>
-		concept AreCompatible = (IsTerminatedString<S> or (not (IsTerminatedString<Vs> or ...)));
+		concept AreCompatible = (IsAnyStringOrView<S> and (IsTerminatedString<S> or (not (IsTerminatedString<Vs> or ...))));
 
 		template <typename K, typename ...Vs>
 		concept AreSectionExtractable = (IsAnyStringOrView<K> and AreExtractable<Vs...>);
@@ -129,15 +129,13 @@ namespace StreamParser
 
 		[[nodiscard]] inline std::string_view TrimLeft(const std::string_view view) noexcept
 		{
-			const auto startIt = std::find_if_not(view.begin(), view.end(), IsWhitespace);
-			return {startIt, view.end()};
+			return {std::find_if_not(view.begin(), view.end(), IsWhitespace), view.end()};
 		}
 
 
 		[[nodiscard]] inline std::string_view TrimRight(const std::string_view view) noexcept
 		{
-			const auto endIt = std::find_if_not(view.rbegin(), view.rend(), IsWhitespace);
-			return {view.begin(), endIt.base()};
+			return {view.begin(), std::find_if_not(view.rbegin(), view.rend(), IsWhitespace).base()};
 		}
 
 
@@ -269,7 +267,7 @@ namespace StreamParser
 
 
 	template <typename S, typename ...Vs>
-	requires (Concepts::IsAnyStringOrView<S> and Concepts::AreCompatible<S, Vs...> and Concepts::AreExtractable<Vs...>)
+	requires (Concepts::AreCompatible<S, Vs...> and Concepts::AreExtractable<Vs...>)
 	inline bool ExtractFromStrings
 	(
 		const std::span<const S>    sources,
