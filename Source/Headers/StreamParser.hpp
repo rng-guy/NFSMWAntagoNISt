@@ -336,7 +336,7 @@ namespace StreamParser
 			if (not content.starts_with(start)) return std::nullopt;
 			if (not content.ends_with  (end))   return std::nullopt;
 
-			return Details::Trim(content.substr(1, content.length() - 2));
+			return Details::Trim(content.substr(1, content.length() - 2)); // guaranteed safe
 		}
 
 
@@ -356,7 +356,7 @@ namespace StreamParser
 				const size_t segmentLength  = (isFinalSegment) ? std::string_view::npos : (endPosition - startPosition);
 
 				const std::string_view segment = Details::Trim(value.substr(startPosition, segmentLength));
-				if (segment.empty()) return false;
+				if (segment.empty()) return false; // empty string provided as segment
 
 				segments.push_back(segment);
 				if (isFinalSegment) break;
@@ -374,7 +374,7 @@ namespace StreamParser
 			std::vector<std::string_view>& segments
 		) {
 			const size_t firstAssign = content.find(assign);
-			if (firstAssign == std::string_view::npos) return std::nullopt; // missing delimiter
+			if (firstAssign == std::string_view::npos) return std::nullopt; // missing assignment
 
 			const std::string_view key = Details::TrimRight(content.substr(0, firstAssign));
 			if (key.empty()) return std::nullopt; // missing key
@@ -400,10 +400,9 @@ namespace StreamParser
 			const size_t  sectionCapacity        = 0,
 			const size_t  pairCapacityPerSection = 0
 		) {
-			std::string line;
-		
 			Section* currentSection = nullptr;
 
+			std::string                   line;
 			std::vector<std::string_view> segments;
 
 			this->nameToSection.reserve(this->nameToSection.size() + sectionCapacity);
