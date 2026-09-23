@@ -336,7 +336,7 @@ namespace StreamParser
 			if (not content.starts_with(start)) return std::nullopt;
 			if (not content.ends_with  (end))   return std::nullopt;
 
-			return Details::Trim(content.substr(1, content.length() - 2)); // guaranteed safe
+			return Details::Trim(content.substr(1, content.length() - 2)); // safe due to sentinels
 		}
 
 
