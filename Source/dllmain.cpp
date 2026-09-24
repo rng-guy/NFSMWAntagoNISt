@@ -247,13 +247,13 @@ ASSEMBLY_DETOUR(VehicleSource, 0x6F30CB, 0x6F30D1)
 
 [[nodiscard]] static bool IsValidVehicleType(const vault vehicleType)
 {
-	const auto GetVaultNode          = AsFunction<address __cdecl    (vault,   vault)>        (0x455FD0);
-	const auto GetVaultNodeAttribute = AsFunction<address __thiscall (address, vault, size_t)>(0x454190);
+	const auto GetVaultNode     = AsFunction<address __cdecl    (vault,   vault)>        (0x455FD0);
+	const auto GetNodeAttribute = AsFunction<address __thiscall (address, vault, size_t)>(0x454190);
 
 	const address node = GetVaultNode("pvehicle"_vlt, vehicleType);
 	if (not node) return false; // unknown attribute node
 
-	const address attribute = GetVaultNodeAttribute(node, "CLASS"_vlt, /* index = */ 0);
+	const address attribute = GetNodeAttribute(node, "CLASS"_vlt, /* index = */ 0);
 	if (not attribute) return false; // missing "CLASS" attribute parameter
 
 	switch (AsReference<vault>(attribute + 0x8))
