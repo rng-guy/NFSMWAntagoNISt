@@ -1,15 +1,16 @@
 ﻿
-── ■ │ WHAT IS NFSMW ANTAGONIST? (v1.00.03) │ ■ ───────────────────────────────────────────────────
+── ■ │ WHAT IS NFSMW ANTAGONIST? (v1.00.04) │ ■ ───────────────────────────────────────────────────
 
 VIEW THIS FILE on GitHub: https://github.com/rng-guy/NFSMWAntagoNISt
 
-AntagoNISt lets you CHANGE BACKGROUND VEHICLES in NIS cutscenes that have any.
+AntagoNISt lets you CHANGE BACKGROUND VEHICLES in NIS cutscenes that support them,
+such as the race entrances for Blacklist rivals or the ending of the final pursuit.
 
 The SECTIONS BELOW address these questions in detail:
  1) • How do I install AntagoNISt for my game?
  2) • Which mods are (in)compatible with AntagoNISt?
- 3) • How may I share or bundle AntagoNISt?
- 4) • What changed in each version of AntagoNISt?
+ 3) • How may I share or bundle          AntagoNISt?
+ 4) • What changed in each version of    AntagoNISt?
 
 
 
@@ -52,9 +53,7 @@ Almost all OTHER .ASI MODS should be fully compatible with AntagoNISt.
 
 ── ■ │ 3 - HOW MAY I SHARE OR BUNDLE ANTAGONIST? │ ■ ──────────────────────────────────────────────
 
-You are free to bundle AntagoNISt and its files with your own mod, NO CREDIT REQUIRED. 
-In the interest of code transparency, however, consider linking to AntagoNISt's GitHub repository
-(https://github.com/rng-guy/NFSMWAntagoNISt) somewhere in your mod's documentation (e.g. README).
+You're free to bundle AntagoNISt and its files with your own mod(s); NO CREDIT REQUIRED.
 
 
 
@@ -67,3 +66,4 @@ v1.00.00: Initial release
       01: Corrected README formatting
       02: Marked unused vehicles in .ini file
       03: Clarified meaning of unused vehicles
+      04: Clarified mod scope and utility further

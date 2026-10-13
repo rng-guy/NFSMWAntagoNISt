@@ -1,7 +1,7 @@
 
-![I'm not seeing ghosts!](Thumbnail.jpg "Finally it can truly be everyone.")
+![You're not seeing ghosts!](Thumbnail.jpg "Finally, it can truly be everyone.")
 
-AntagoNISt lets you **change background vehicles** in *Need for Speed: Most Wanted* (2005) NIS cutscenes.
+AntagoNISt lets you **change background vehicles** in *Need for Speed: Most Wanted* (2005) NIS cutscenes that support them, such as the race entrances for Blacklist rivals or the ending of the final pursuit.
 
 &nbsp;
 
@@ -29,7 +29,7 @@ The **sections below** address these questions in detail:
 &nbsp;
 
 **To install** AntagoNISt:
-1. download and extract the [`NfSMW_AntagoNISt_v1.00.3.7z`](https://github.com/rng-guy/NFSMWAntagoNISt/releases/latest) archive;
+1. download and extract the [`NfSMW_AntagoNISt_v1.00.4.7z`](https://github.com/rng-guy/NFSMWAntagoNISt/releases/latest) archive;
 2. copy AntagoNISt's `scripts` folder to your game's folder, replacing existing files; and
 3. if AntagoNISt's `.asi` file gets flagged by your antivirus software, whitelist the file.
 
@@ -65,4 +65,4 @@ Almost all  **other `.asi` mods** should be fully compatible with AntagoNISt.
 
 # 3 - How may I share or bundle AntagoNISt?
 
-You are free to bundle AntagoNISt and its files with your own mod, **no credit required**. In the interest of code transparency, however, consider linking to [AntagoNISt's GitHub repository](https://github.com/rng-guy/NFSMWAntagoNISt) somewhere in your mod's documentation (e.g. README).
+You're free to bundle AntagoNISt and its files with your own mod(s); **no credit required**.
