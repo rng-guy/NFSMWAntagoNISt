@@ -1,7 +1,7 @@
 
 ![You're not seeing ghosts!](Thumbnail.jpg "Finally, it can truly be everyone.")
 
-AntagoNISt lets you **change background vehicles** in *Need for Speed: Most Wanted* (2005) NIS cutscenes that support them, such as the race entrances for Blacklist rivals or the ending of the final pursuit.
+AntagoNISt lets you **change background vehicles** in *Need for Speed: Most Wanted* (2005) NIS cutscenes that support them, such as the race entrances of Blacklist rivals or the ending of the final pursuit.
 
 &nbsp;
 

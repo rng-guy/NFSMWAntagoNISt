@@ -4,7 +4,7 @@
 VIEW THIS FILE on GitHub: https://github.com/rng-guy/NFSMWAntagoNISt
 
 AntagoNISt lets you CHANGE BACKGROUND VEHICLES in NIS cutscenes that support them,
-such as the race entrances for Blacklist rivals or the ending of the final pursuit.
+such as the race entrances of Blacklist rivals or the ending of the final pursuit.
 
 The SECTIONS BELOW address these questions in detail:
  1) • How do I install AntagoNISt for my game?
