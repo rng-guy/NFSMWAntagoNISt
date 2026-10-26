@@ -43,13 +43,11 @@
 
 // Debugging macros ---------------------------------------------------------------------------------------------------------------------------------
 
-// In debug builds, Visual Studio forces an unconditional dynamic allocation for each suitable type.
-// This makes dynamic containers (e.g. std::vector, std::string) constinit-incompatible, even if empty.
 #ifndef _DEBUG
 #define RELEASE_CONSTINIT constinit
 
 #else 
-#define RELEASE_CONSTINIT
+#define RELEASE_CONSTINIT // because Visual Studio can force unconditional dynamic allocations in (e.g.) std::vector
 
 #endif
 
