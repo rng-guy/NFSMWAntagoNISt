@@ -43,11 +43,11 @@
 
 // Debugging macros ---------------------------------------------------------------------------------------------------------------------------------
 
-#ifndef _DEBUG
-#define RELEASE_CONSTINIT constinit
+#ifdef _DEBUG
+#define RELEASE_CONSTINIT // because Visual Studio can force unconditional dynamic allocations in (e.g.) std::vector
 
 #else 
-#define RELEASE_CONSTINIT // because Visual Studio can force unconditional dynamic allocations in (e.g.) std::vector
+#define RELEASE_CONSTINIT constinit
 
 #endif
 
