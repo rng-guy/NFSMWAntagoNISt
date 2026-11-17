@@ -23,10 +23,6 @@
 
 #include <Windows.h>
 
-#ifdef _DEBUG
-#include <debugapi.h>
-#endif
-
 #include <array>
 #include <cstdint>
 #include <fstream>
@@ -76,7 +72,7 @@ constexpr size_t numVehicles = 8;
 
 using VehicleTypes = std::array<vault, numVehicles>;
 
-static_assert(sizeof(VehicleTypes) == 32, "Layout mismatch");
+static_assert(sizeof(VehicleTypes) == 32, "Size of vehicle-type array must be 32 bytes");
 
 
 
@@ -277,7 +273,7 @@ static bool ExtractVehicleTypes
 		"car5", "car6", "car7", "car8"
 	};
 
-	static_assert(keys.size() == numVehicles, "Key-count mismatch");
+	static_assert(keys.size() == numVehicles, "Number of keys must match actual key count");
 
 	for (size_t vehicleID = 0; vehicleID < numVehicles; ++vehicleID)
 	{
@@ -327,10 +323,6 @@ void __cdecl Initialise
 ) {
 	CALL_HOOK_ORIGINAL(Initialise, numArgs, argArray);
 
-	#ifdef _DEBUG
-	while (not IsDebuggerPresent()); // halt until debugger is attached
-	#endif
-
 	// Parse configuration file
 	const std::filesystem::path configFile = "scripts/NFSMWAntagoNIStSettings.ini";
 
@@ -357,16 +349,10 @@ BOOL WINAPI DllMain
 	const DWORD     fdwReason,
 	const LPVOID    lpvReserved
 ) {
-	if (fdwReason != DLL_PROCESS_ATTACH) return TRUE;
-
-	if (MemoryTools::GetEntryPoint() != 0x3C4040) // .exe-dependent entry point
-	{
-		MessageBoxA(NULL, "This .exe isn't compatible with AntagoNISt.\nSee AntagoNISt's README for help.", "NFSMW AntagoNISt", MB_ICONERROR);
-
-		return FALSE; // should never happen (assuming the user has actually read the README, which... yeah...)
-	}
+	if (fdwReason != DLL_PROCESS_ATTACH)             return true;
+	if (not MemoryTools::AssertEntryPoint(0x3C4040)) return false;
 
 	PATCH_HOOK_FUNCTION(Initialise, 0x6665B4); // InitializeEverything (0x665FC0)
 
-	return TRUE;
+	return true;
 }
